@@ -1,7 +1,9 @@
 const {response} = require('express');
 const User = require('../models/User');
 const bcrypt = require('bcryptjs');
-const { createJWT } = require('../helpers/jwt')
+const { createJWT } = require('../helpers/jwt');
+const { error400, error500 }  = require('../helpers/errorHandler');
+const { successfulMessages, errorMessages } = require('../responses/responsesMessages');
 
 const createUser = async (req, res = response) => {
 
@@ -9,11 +11,7 @@ const createUser = async (req, res = response) => {
   try {
     let user = await User.findOne({email});
     if (user) {
-      console.log('debe caer aca')
-      return res.status(400).json({
-        ok:  false,
-        msg: `This email: ${email} is already registered`
-      })
+      return error400(res,'user not founded', errorMessages.duplicatedEmail);
     }
     user = new User(req.body);
     // Encrypt password
@@ -25,17 +23,13 @@ const createUser = async (req, res = response) => {
 
     return res.status(201).json({
       ok: true,
-      msg: 'User has been saved successfully',
+      msg: successfulMessages.created200('User'),
       id: user.id,
       name: user.name,
       token
     });
   } catch (error) {
-    console.log(error)
-    res.status(500).json({
-      ok: false,
-      msg: 'Failing when trying to save user in DB.'
-    })
+    return error500(res, error, errorMessages.savingDBfailed('user'));
   }
 }
 const loginUser = async (req, res = express.response) => {
@@ -44,36 +38,26 @@ const loginUser = async (req, res = express.response) => {
   try {
     let user = await User.findOne({email});
     if (!user) {
-      return res.status(400).json({
-        ok: false,
-        msg: 'Email and password do not match with our registers.'
-      })
+      return error400(res,'user not founded', errorMessages.fialedLoginAttempt);
     }
 
     const validPassword = bcrypt.compareSync(password, user.password);
 
     if (!validPassword) {
-      return res.status(400).json({
-        ok: false,
-        msg: 'Email and password do not match with our registers.'
-      });
+      return error400(res,'invalid password', errorMessages.fialedLoginAttempt);
     }
     // Generate JWT
     const token = await createJWT(user.id, user.name);
     return res.status(200).json({
       ok: true,
-      msg: 'login',
+      msg: successfulMessages.login200,
       id: user.id,
       name: user.name,
       token
     })
     
   } catch (error) {
-    console.log(error)
-    res.status(500).json({
-      ok: false,
-      msg: 'Failing when trying to login.'
-    })
+    return error500(res, error, errorMessages.defaultLoginError);
   }
 }
 const renewToken = async(req, res = express.response) => {
@@ -85,7 +69,7 @@ const renewToken = async(req, res = express.response) => {
 
  res.status(200).json({
   ok: true,
-  msg: 'renew',
+  msg: successfulMessages.renewedToken,
   token, name
  })
 }
