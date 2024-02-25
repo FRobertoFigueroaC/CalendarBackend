@@ -70,7 +70,7 @@ const renewToken = async(req, res = express.response) => {
  res.status(200).json({
   ok: true,
   msg: successfulMessages.renewedToken,
-  token, name
+  token, id, name
  })
 }
 
