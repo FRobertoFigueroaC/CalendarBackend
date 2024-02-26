@@ -18,7 +18,7 @@
 
 router.use(validateJWT)
 router.get('/',getEvents);
-router.post('',eventFieldValidators(), createEvent);
+router.post('/',eventFieldValidators(), createEvent);
 router.put('/:id',eventFieldValidators(), updateEvent);
 router.delete('/:id', deleteEvent);
   
