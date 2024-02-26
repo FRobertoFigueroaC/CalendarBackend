@@ -81,7 +81,7 @@ const deleteEvent = async(req, res = response) => {
   const userId = req.id;
   try {
     let event = await Event.findById(eventId);
-    return errorNotExistOrUnauthorized(res,'event',event,eventId,userId);
+    errorNotExistOrUnauthorized(res,'event',event,eventId,userId);
     await event.deleteOne()
     
     return res.status(200).json({
