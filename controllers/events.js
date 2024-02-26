@@ -39,7 +39,7 @@ const createEvent = async(req, res = response) => {
     return res.status(201).json({
       ok: true,
       msg: successfulMessages.created200('Event'),
-      event
+      event: savedEvent
     })
     
   } catch (error) {
@@ -55,7 +55,7 @@ const updateEvent = async(req, res = response) => {
 
   try {
     let event = await Event.findById(eventId);
-    return errorNotExistOrUnauthorized(res,'event',event,eventId,userId);
+    errorNotExistOrUnauthorized(res,'event',event,eventId,userId);
     const updateParams = {
       ...req.body,
       user: userId
